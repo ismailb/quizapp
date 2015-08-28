@@ -7,10 +7,12 @@
 var express = require('express');
 
 var passport = require('passport');
-var FacebookStrategy = require('passport-facebook').Strategy;
+/*var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-var GithubStrategy = require('passport-github').Strategy;
-var GoogleStrategy = require('passport-google').Strategy;
+var GithubStrategy = require('passport-github').Strategy;*/
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var auth = require('./auth');
+
 
 var favicon = require('serve-favicon');
 var morgan = require('morgan');
@@ -29,12 +31,23 @@ module.exports = function(app) {
   app.engine('html', require('ejs').renderFile);
   app.set('view engine', 'html');
   app.use(compression());
-  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(bodyParser.urlencoded({
+    extended: false
+  }));
   app.use(bodyParser.json());
   app.use(methodOverride());
   app.use(cookieParser());
   app.use(passport.initialize());
-  
+  passport.use(new GoogleStrategy(auth.googleAuth,
+    function(req, accessToken, refreshToken, profile, done) {
+      console.log('profile' + profile);
+      done(null, req);
+      /*User.findOrCreate(..., function(err, user) {
+      done(err, user);
+    });*/
+    }
+  ));
+
   if ('production' === env) {
     app.use(favicon(path.join(config.root, 'public', 'favicon.ico')));
     app.use(express.static(path.join(config.root, 'public')));
@@ -50,4 +63,36 @@ module.exports = function(app) {
     app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
+
+
+  app.get('/login', passport.authenticate('google', {
+    session: false,
+    scope: [
+      //  'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ]
+  }));
+
+  app.get('/auth/google/callback',
+    passport.authorize('google', {
+      failureRedirect: '/account'
+    }),
+    function(req, res) {
+      var user = req.user;
+      var account = req.account;
+
+      console.log(user);
+      console.log(account);
+      res.redirect('/');
+      // Associate the Twitter account with the logged-in user.
+      /*      account.userId = user.id;
+      account.save(function(err) {
+        if (err) {
+          return self.error(err);
+        }
+        self.redirect('/');
+      });
+*/
+    }
+  );
 };

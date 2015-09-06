@@ -15,6 +15,11 @@ var SheetSchema = new Schema({
 	active: Boolean
 });
 
+SheetSchema.virtual('id').get(function() {
+  return this._id.toString();
+});
+
+
 SheetSchema.plugin(random, { path: 'r' });
 
 module.exports = mongoose.model('Sheet', SheetSchema);

@@ -1,11 +1,11 @@
 'use strict';
 
 angular.module('quizApp')
-	.controller('ExamCtrl', function($scope, $http) {
+	.controller('ExamCtrl', function($scope, $http, $state) {
 		$scope.exam = {
 			takenExam: false,
 		};
-		
+
 		$scope.sheet = {};
 		$scope.totalItems = 10;
 		$scope.currentItem = 1;
@@ -15,7 +15,7 @@ angular.module('quizApp')
 		};
 
 		$scope.next = function() {
-			if($scope.currentItem != $scope.totalItems) {
+			if ($scope.currentItem != $scope.totalItems) {
 				++$scope.currentItem;
 			}
 		};
@@ -27,9 +27,23 @@ angular.module('quizApp')
 		};
 
 		$scope.submit = function(examForm) {
-			
-		    var sheet = angular.copy($scope.sheet);
-		    console.log(sheet);
+			var sheet = angular.copy($scope.sheet);
+			console.log(sheet);
+			var request = _.map(sheet, function(value, key) {
+				return {
+					_id: key,
+					answer: value
+				};
+			});
+			console.log(request);
+			$http.post('/api/exam', request).then(function(response) {
+				console.log(response);
+				alert('Score :' + response.data.score);
+			}, function(response) {
+				$scope.exam.takenExam = false;
+				alert('Oops! Try again later!');
+			});
+			$state.go('main');
 		};
 
 		$scope.takeExam = function() {

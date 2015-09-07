@@ -17,6 +17,7 @@
         "mongoose": "~4.0.3",
         "composable-middleware": "^0.3.0",
         "connect-mongo": "^0.8.1",
+        "mongoose-random": "*",
         "passport": "*",
         "passport-google-oauth": "*",
         "passport-twitter": "*",

@@ -38,7 +38,7 @@ angular.module('quizApp')
 			console.log(request);
 			$http.post('/api/exam', request).then(function(response) {
 				console.log(response);
-				alert('Score :' + response.data.score);
+				alert('Your score is:' + response.data.score);
 			}, function(response) {
 				$scope.exam.takenExam = false;
 				alert('Oops! Try again later!');
